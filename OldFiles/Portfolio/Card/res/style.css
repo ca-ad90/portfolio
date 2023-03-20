@@ -1,0 +1,551 @@
+
+/*
+Root-variabler fÃƒÂ¶r att enkelt kunna ha samma vÃƒÂ¤rden pÃƒÂ¥ flera stÃƒÂ¤llen.
+*/
+:root {
+    --inputSelectColor: #6776a7;
+    --inputColor: skyblue;
+    --inputBgColor: #eaf3ff;
+    --inputBoxSize: 20px;
+    --flippTime: 0.9s;
+    --shadowSize: 200px
+}
+
+*,
+* * {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    /* height: 100vh; */
+}
+
+.page-wrapper {
+    display: flex;
+    height: 95%;
+    justify-content: center;
+    width: 95%;
+    padding: 2vw;
+    /* padding-right: 5vw; */
+}
+/*
+FormulÃƒÂ¤ret, med perspektivet som ger lyfteffekt
+*/
+.form-content {
+    position: relative;
+    /* display: block; */
+    /* top: 26px; */
+    perspective: 2000px;
+    width: 100%;
+    max-width: 580px;
+    height: 98%;
+    margin:
+    auto;
+    min-width: 299px;
+}
+/*ErsÃƒÂ¤ttare fÃƒÂ¶r Legend element*/
+.legend {
+    font-family: "Zilla Slab";
+    /* flex-basis: 100%; */
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+legend {
+    display: none;
+}
+
+
+/*
+-------------------------
+Flip-card instÃƒÂ¤llningar
+------------------------
+*/
+    /*Yttsta delen, container i vilken anamation fÃƒÂ¶r att kortet "lyfter" sker*/
+.flipp-card {
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    animation-duration: var(--flippTime);
+    animation-iteration-count: 1;
+    animation-play-state: running;
+    animation-timing-function: ease-out;
+    transform-style: preserve-3d;
+}
+
+    /*
+        Kontainer fÃƒÂ¶r sjÃƒÂ¤lva flipp kortet
+    */
+.flipp-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* min-height: 500px; */
+    background-color: rgb(217, 233, 255);
+    transition: var(--flippTime);
+    transition-timing-function: ease-out;
+    transform-style: preserve-3d;
+}
+    /*
+    utseende fÃƒÂ¶r fram och baksida.
+    */
+.card {
+    /* position: absolute; */
+    top: 0;
+    left: 0;
+    border: none;
+    display: flex;
+    width: 100%;
+    /* min-height: 500px; */
+    height: 100%;
+    flex-flow: row wrap;
+    background-color: rgb(217, 233, 255);
+    transition: var(--flippTime);
+    max-width: 600px;
+    padding: 7px;
+    border-radius: 15px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+    /*baksidan ÃƒÂ¤r frÃƒÂ¥nvÃƒÂ¤nd frÃƒÂ¥n start (backface)*/
+.card.back {
+    position: absolute;
+    transform: rotateY(180deg);
+}
+
+
+
+/*Rubrik kontainer*/
+.card-header{
+    margin:auto;
+    width:85%;
+}
+.heading{
+    flex-basis: 100%;
+    text-align: center;
+    font-size: 18pt;
+    margin:0px;
+    margin-bottom:10px;
+}
+.sub-heading{
+    font-size:13pt;
+    margin:0px;
+    text-align: center;
+}
+
+    /*Layout fÃƒÂ¶r feildsetts*/
+fieldset {
+    display: flex;
+    border: none;
+    /* height: fit-content; */
+    width: 99%;
+    flex-direction: column;
+    padding: 2vh;
+    padding-left: 4vh;
+    border-radius: 15px;
+}
+
+
+
+
+
+/*Specifika layouts fÃƒÂ¶r fieldsets*/
+#contact-info {
+    flex-basis: 49%;
+    flex-grow: 1;
+    min-width: 154px;
+}
+#frequence,
+#visits {
+    flex-flow: column;
+    width: 49%;
+}
+#t-size,
+#submit {
+    flex-flow: row wrap;
+    /* justify-content: space-between; */
+    /* align-items: flex-end; */
+    width: 94%;
+    padding-bottom: 0px;
+}
+
+
+/*
+------------------------------------------
+EGNA RADIO OCH CHECKBOXELEMENT
+----------------------------------------
+*/
+
+/*Label fungerar som kontainer fÃƒÂ¶r egen stylade Radio och Check element. fÃƒÂ¶r att text och knapp skall hamna rÃƒÂ¤tt*/
+label.custom {
+    display: flex;
+    position: relative;
+    width: 25%;
+    height: 30px;
+    align-items: baseline;
+    min-width: 125px;
+}
+
+
+/*Grundlayout fÃƒÂ¶r Radio och Checkboxes*/
+.custom input[type=radio],
+.custom input[type=checkbox] {
+    appearance: none;
+    background-color: var(--inputBgColor);
+    content: "";
+    position: relative !important;
+    width: 26px;
+    height: 26px;
+    border-radius: 3px;
+    border: 2px solid var(--inputColor);
+    margin: 0px;
+    top: 7px;
+    transition: 0.2s;
+    box-shadow:inset 1px 1px 2px 1px rgba(50, 50, 100, 0.5);
+    overflow: hidden;
+}
+
+/*Hover och fokus fÃƒÂ¶r Radio och Checkboxes*/
+.custom input[type=radio]:hover,
+.custom input[type=radio]:focus-visible,
+.custom input[type=checkbox]:hover,
+.custom input[type=checkbox]:focus-visible
+{
+    border-color: var(--inputSelectColor);
+    box-shadow: inset 2px 2px 2px 1px rgba(50, 50, 100, 0.5);
+    transform-origin: center center;
+    transform: scale(1.2);
+    outline: none;
+}
+
+/*FÃƒÂ¶r att Radio ska vara runda*/
+.custom input[type=radio] {
+    border-radius: 100%;
+    flex-shrink: 0;
+}
+
+/*Annan fÃƒÂ¤rg nÃƒÂ¤r de ÃƒÂ¤r "Checked"*/
+.custom input[type=radio]:checked,
+.custom input[type=checkbox]:checked {
+    border-color: var(--inputSelectColor);
+}
+
+
+/*FÃƒÂ¶r att det skall vara nÃƒÂ¥got "inne" i Radio och Checkboxar nÃƒÂ¤r de ÃƒÂ¤r valda*/
+.custom input[type=radio]:checked::after {
+    content: "";
+    position: relative;
+    display: block;
+    width: 60%;
+    height: 60%;
+    margin: auto;
+    top: 20%;
+    border-radius: 100%;
+    background-color: var(--inputSelectColor);
+}
+.custom input[type=checkbox]:checked::before,
+.custom input[type=checkbox]:checked::after {
+    content: "";
+    position: absolute;
+    top: 40%;
+    left: 10%;
+    display: block;
+    width: 80%;
+    border-radius: 60px;
+    height: 15%;
+    margin: auto;
+    background-color: var(--inputSelectColor);
+    transform-origin: 50% 50%;
+    transform: rotate(45deg);
+}
+.custom input[type=checkbox]:checked::before {
+    transform: rotate(-45deg);
+}
+
+
+
+
+/*
+---------
+KNAPPAR (SUBMIT, RESET, FLIPP)
+----------
+*/
+input[type=reset],
+input[type=submit],
+label.flipp-btn {
+    width: 100px;
+    height:35px;
+    display: inline-block;
+    background-color: var(--inputColor);
+    border: none;
+    box-shadow: 1px 1px 2px rgba(5, 5, 100, 0.5);
+    transition: 0.2s;
+    transform-origin: 50% 50%;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding-top:10px;
+    padding-bottom:10px;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+input[type=reset]:hover,
+input[type=submit]:hover,
+label.flipp-btn:hover {
+    transform:scale(1.1)
+} 
+
+
+/*
+------------------
+TEXT- OCH SELECT INPUTS
+-------------------
+*/
+
+textarea {
+    resize: none;
+    height:100px;
+    width:250px;
+}
+
+select,
+textarea,
+input[type=number],
+input[type=email],
+input[type=text] {
+    margin-bottom: 3vh;
+    max-width: 250px;
+    min-width: 150px;
+    width: 50%;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: var(--inputBgColor);
+    border: none;
+    box-shadow:
+    inset 1px 1px 2px 1px rgba(50, 50, 100, 0.5);
+    transition: 0.1s;
+    flex: 1 1 59%;
+    margin-right: 2vw;
+}
+select:focus-visible,
+textarea:focus-visible,
+input[type=number]:focus-visible,
+input[type=email]:focus-visible,
+input[type=text]:focus-visible {
+    outline: 3px solid var(--inputSelectColor);
+    border-color: transparent;
+    transform: scale(1.05);
+    transform-origin: 40px 50%;
+}
+
+
+#flipp-control-wrapper {
+    padding-top: 0px;
+    width: 81%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+}
+
+#flipp-control-wrapper > input {
+    display: block;
+}
+
+#flipp-control-wrapper > input, #flipp-control-wrapper > label {
+    display: block;
+    /* color: red; */
+    margin-right: 2vmin;
+    margin-bottom: 2vmin;
+}
+
+label.submit-btn {
+    /* max-width: 155px; */
+    min-width: 107px;
+    flex: 0 1 40%;
+    height: 37px;
+    background-color: var(--inputSelectColor);
+}
+
+/*
+pseusdo element som utgÃƒÂ¶r "skuggan" nÃƒÂ¤r kortet vÃƒÂ¤nder. 
+*/
+.form-content::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: black;
+    z-index: -9;
+    box-shadow: 0px 0px 5px 2px black;
+    transform-style: preserve-3d;
+    transition: var(--flippTime);
+    animation-duration: var(--flippTime);
+    transform-origin: 50% 50%;
+    animation-iteration-count: 1;
+    animation-play-state: running;
+    animation-timing-function: ease-out;
+    transform-style: preserve-3d;
+    opacity: 0.3;
+}
+
+/*
+---------------------
+FLIPP KONTROLLER
+------------------------
+*/
+
+/*dÃƒÂ¥lda radio-knappar*/
+.flipp-control{
+    display: none;
+}
+/*
+-----------
+Flippeffekt
+----------
+*/
+#flipp-control-back:checked~.form-content .flipp-card .flipp-inner {
+    transform: rotateY(180deg);
+}
+#flipp-control-back:checked~.form-content .flipp-card .flipp-inner .card.front {
+    background-color: rgb(97, 128, 172);
+    z-index:-99;
+}
+#flipp-control-front:checked~.form-content .flipp-card .flipp-inner .card.back {
+    background-color: rgb(97, 128, 172);
+    z-index:-99;
+}
+#flipp-control-front:checked~.form-content .flipp-card .flipp-inner {
+    transform: rotateY(0deg);
+}
+/*
+-------------
+Andra Effekter (lyft och skugga)
+-------------
+*/
+
+#flipp-control-back:checked~.form-content .flipp-card {
+    animation-name: lift;
+}
+#flipp-control-front:checked~.form-content .flipp-card {
+    animation-name: lift2;
+}
+#flipp-control-back:checked~.form-content::after {
+    animation-name: shadow;
+}
+#flipp-control-front:checked~.form-content::after {
+    animation-name: shadow2;
+}
+.frequence-wrapper {
+    display: flex;
+    width: 100%;
+    flex-flow: wrap;
+}
+
+.visits-wrapper {
+    display: flex;
+    width: 100%;
+    flex-flow: wrap;
+}
+
+.contact-wrapper {
+    display: flex;
+    width: §;
+    width: 100%;
+    flex-flow: column;
+}
+
+#visits {
+    flex: 1 1 100%;
+}
+
+
+/*--------------------
+Flipp animationer
+-----------------*/
+
+@keyframes lift {
+    0% {
+        transform: translateZ(0px)
+    }
+
+    50% {
+        transform: translateZ(500px)
+    }
+
+    100% {
+        transform: translateZ(0px)
+    }
+}
+
+@keyframes lift2 {
+    0% {
+        transform: translateZ(0px)
+    }
+
+    50% {
+        transform: translateZ(500px)
+    }
+
+    100% {
+        transform: translateZ(0px)
+    }
+}
+
+@keyframes shadow {
+    0% {
+        width: 100%;
+        height: 100%;
+        box-shadow: 0px 0px 5px 2px black;
+        opacity: 0.3;
+    }
+
+    50% {
+        width: 0%;
+        left: 50%;
+        box-shadow: 0px 0px 50px 50px black;
+        opacity: 0.2
+    }
+
+    100% {
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0%;
+        box-shadow: 0px 0px 5px 2px black;
+        opacity: 0.3
+    }
+}
+
+@keyframes shadow2 {
+    0% {
+        width: 100%;
+        height: 100%;
+        box-shadow: 0px 0px 5px 2px black;
+        opacity: 0.3;
+    }
+
+    50% {
+        width: 0%;
+        left: 50%;
+        box-shadow: 0px 0px 50px 50px black;
+        opacity: 0.2
+    }
+
+    110% {
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0%;
+        box-shadow: 0px 0px 5px 2px black;
+        opacity: 0.3
+    }
+}

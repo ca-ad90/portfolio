@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinn en T-shirt</title>
+    <link href="res/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="page-wrapper" id="page">
+        <!--Gömda radioknappar, kontoller för vilken sida av kortet som visas-->
+        <input type="radio" name="flipp-control" id="flipp-control-back" class="flipp-control">
+        <input type="radio" name="flipp-control" id="flipp-control-front" class="flipp-control">
+
+        <!--Formuläret omsluter hela flipp-cardet-->
+        <form action="#" method="get" class="form-content">
+            <!--Kontainer för flipp-effekt, även för att kortet skall "lyfta"-->
+            <div class="flipp-card">
+                <!--Kontainer för själva flipp-cardet, det som "snurrar"-->
+                <div class="flipp-inner">
+                    <!--Kortets framsida-->
+                    <div class="card front">
+                        <div class="card-header">
+                            <p class="heading">FLIP-CARD FROM CONCEPT</p>
+                            <p class="sub-heading">CONCEPT FORM</p>
+                        </div>
+                        <fieldset id="contact-info">
+                            <!--legends är skit fula och jobbifa att styla, så den finns här för
+                            att det ingick i uppgiften, men i har display:none-->
+                            <legend>Kontaktuppgifter</legend>
+                            <!--min egna div som ersätter legend-elementet-->
+                            <div class="legend">Kontaktuppgifter</div>
+                            <div class="contact-wrapper">
+                                <input id="txtName" name="name" type="text" placeholder="Sriv ditt namn" required>
+                                <input id="txtAge" name="age" type="number" placeholder="Skriv din ålder">
+                                <input id="txtEmail" name="email" type="email" placeholder="Skriv din epost">
+                            </div>
+
+                        </fieldset>
+                        <fieldset id="frequence">
+                            <div class="legend">Hur ofta besöker du hemsidan?</div>
+                            <div class="frequence-wrapper">
+                                <label class="custom">
+                                    <input id="freqDay" name="freq" type="radio" value="Varje dag">
+                                    Varje dag
+                                </label>
+                                <label class="custom">
+                                    <input id="freqOtherDay" name="freq" type="radio" value="Varannan dag">
+                                    Varannan dag
+                                </label>
+                                <label class="custom">
+                                    <input id="freqWeek" name="freq" type="radio" value="Varje vecka">
+                                    Varje vecka:
+                                </label>
+                                <label class="custom">
+                                    <input id="freqLess" name="freq" type="radio" value="Mer sällan">
+                                    Mer sällan
+                                </label>
+                            </div>
+                        </fieldset>
+                        <fieldset id="visits">
+                            <div class="legend">Vad gör du på vår hemsida?</div>
+                            <div class="visits-wrapper">
+                                <label class="custom">
+                                    <input id="visit_newa" name="visits" type="checkbox" value="Nyheter">
+                                    Nyheter
+                                </label>
+                                <label class="custom">
+
+                                    <input id="visit_world" name="visits" type="checkbox" value="Utrikes">
+                                    Utrikes
+                                </label>
+                                <label class="custom">
+                                    <input id="visit_domestic" name="visits" type="checkbox" value="Inrikes">
+                                    Inrikes
+                                </label>
+                                <label class="custom">
+
+                                    <input id="visit-sport" name="visits" type="checkbox" value="Sport">
+                                    Sport
+                                </label>
+                                <label class="custom">
+                                    <input id="visit-gossip" name="visits" type="checkbox" value="Skvaller">
+                                    Skvaller
+                                </label>
+                                <label class="custom">
+                                    <input id="visit-weather" name="visits" type="checkbox" value="Väder">
+                                    Väder
+                                </label>
+                                <label class="custom">
+                                    <input id="visit-other" name="visits" type="checkbox" value="Övrigt">
+                                    Övrigt
+                                </label>
+                            </div>
+
+                        </fieldset>
+                        <fieldset>
+                            <label for="flipp-control-back" class="flipp-btn">Nästa</label>
+                        </fieldset>
+                    </div>
+
+                    <!--baksida av koretet, bortvänt från start-->
+                    <div class="card back">
+                        <div class="card-header">
+                            <p class="heading">FLIP-CARD FROM CONCEPT</p>
+                            <p class="sub-heading">CONCEPT FORM</p>
+                        </div>
+                        <fieldset id="good-bad">
+                            <div class="legend">Vad tycker du om vår hemsida?</div>
+                            <textarea id="best" name="best" rows="4" cols="50"
+                                placeholder="Vad är det bästa med vår hemsida?"></textarea>
+                            <textarea id="worst" name="worst" rows="4" cols="50"
+                                placeholder="Vad är det sämsta med vår hemsida?"></textarea>
+                        </fieldset>
+                        <fieldset id="t-size">
+                            <div class="legend">Välj storlek på din T-shirt</div>
+                            <select name="size" id="size">
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M" selected>M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                            </select>
+                            <label class="flipp-btn submit-btn">
+                                Skicka
+                            </label>
+                        </fieldset>
+                        <fieldset id="flipp-control-wrapper">
+                            <input type="reset" value="Återställ">
+                            <label for="flipp-control-front" class="flipp-btn">
+                                Back
+                            </label>
+                        </fieldset>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</body>
+
+</html>

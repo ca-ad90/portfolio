@@ -1,0 +1,182 @@
+html {
+    font-family: "Zilla Slab" ,Georgia, 'Times New Roman', Times, sans-serif;
+    color: #333;
+ }
+
+body {
+    display: flex;
+    margin: 0;
+    flex-flow:column wrap;
+    background-color: hsl(0, 100%, 90%);
+    line-height: 150%; /* means 150% increase */
+    font-size: 16px;
+    overflow: hidden;
+}
+
+#header-wrapper,
+#logo,
+.svg {
+    transition: 0.1s;
+}
+
+.header-grid-aside {
+    /* grid-row: span 2; */
+}
+
+.header-nav-grid {
+    grid-column: 2/span 1;
+}
+
+header {
+    display: flex;
+    flex-flow: column;
+    /* grid-template-rows: minmax(0%, 600px) minmax(41px, 120px); */
+    /*  align-items: center;
+    justify-content: center;
+    flex-flow: row wrap; */
+    background: url(../img/bg.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding:5vmin;
+    position: relative;
+    box-sizing: border-box;
+    width: 100vw;
+    height: 100vh;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/*---- SVG BEAR----{*/
+.bear-svg-container {
+    display: flex;
+    position: relative;
+    width: 62%;
+    height: 100vmin;
+    /* min-height: 115px; */
+    max-height: 469px;
+    /* top: -100px; */
+    justify-content: center;
+}
+
+#bear-svg {
+    width: 350px;
+    height: 100%;
+    transition: 0s !important;
+}
+
+#head-bg {
+    display: none;
+    fill: hsl(334 26% 58%);
+}
+
+.cls-bear-1 {
+    fill: none;
+}
+
+.cls-bear-2 {
+    fill: #ffd27a;
+}
+
+.cls-bear-3 {
+    fill: #f2c05f;
+}
+
+.cls-bear-4 {
+    fill: #fff;
+}
+
+.cls-bear-5 {
+    fill: #363636;
+}
+
+.cls-bear-6 {
+    fill: #474747;
+}
+
+.cls-bear-7 {
+    fill: #e3ad49;
+}
+
+.cls-bear-8 {
+    fill: #b39354;
+}
+
+.cls-bear-9 {
+    fill: #666;
+}
+
+.cls-bear-10 {
+    opacity: 0.19;
+}
+
+.cls-bear-11 {
+    clip-path: url(#clip-path);
+}
+
+.cls-bear-12 {
+    fill: #e0dcba;
+    opacity: 0.5;
+    isolation: isolate;
+}
+
+.cls-bear-13 {
+    clip-path: url(#clip-path-5);
+}
+
+/* } */
+
+/* ----SVG TEXT-----*/
+#logo-container {
+    position: relative;
+    /* left: 20px; */
+    width: 90vw;
+    max-width: 340px;
+    top: -10vmin;
+    /* height: 100%; */
+}
+
+
+#logo-svg {
+    max-width: 100%;
+    max-height: 550px;
+    height: 100%;
+}
+
+#logo-svg-content {
+    stroke-width: 0px;
+}
+
+.logo-cls-1 {
+    fill: none;
+}
+
+.logo-cls-2 {
+    opacity: 0.47;
+}
+
+.logo-cls-3 {
+    fill: #1d1d1b;
+    stroke: #1d1d1b;
+}
+
+.logo-cls-4 {
+    fill: url(#logoFillGradient);
+    stroke: url(#logoFillGradient);
+}
+
+.logo-cls-5 {
+    fill: url(#logoFillGradient-2);
+    stroke: url(#logoFillGradient-2);
+}
+
+.logo-cls-6 {
+    fill: url(#logoFillGradient-3);
+    stroke: url(#logoFillGradient-3);
+}
+
+.logo-cls-7 {
+    fill: url(#logoFillGradient-4);
+    stroke: url(#logoFillGradient-4);
+}
