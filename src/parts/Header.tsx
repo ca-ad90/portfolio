@@ -1,4 +1,5 @@
 import {
+    PointerEventHandler,
     forwardRef,
     useCallback,
     useContext,
@@ -8,33 +9,50 @@ import {
     useState,
 } from "react";
 import "./header.css";
-import { MouseContext } from "../context.js";
+import { MouseContext } from "../context.ts";
 import { gsap } from "gsap";
+import { Type } from "typescript";
 
-function copy(obj) {
+function copy(obj: Array<Type> | Object) {
     return JSON.parse(JSON.stringify(obj));
 }
 
-const Header = forwardRef(function Header(props, wrapper: any) {
-    const mouse = useContext(MouseContext);
-    let content = useRef();
-    let svg = useRef();
-    let navbar = useRef<SVGPathElement>();
-    let [isDragging, setDragging] = useState(false);
-    const [started, setStarted] = useState(false);
-    const bar = useCallback(() => {
-        return navbar.current
-            ? {
-                  height: navbar.current.getBoundingClientRect().height,
-                  width: navbar.current.getBoundingClientRect().width,
-              }
-            : { height: 0, width: 0 };
-    }, [navbar]);
+interface SectionElement extends HTMLElement {
+    height: number;
+    top: number;
+    bottom: number;
+    y: number;
+    tag: number;
+    overflow: number;
+    offset: { top: number; bottom: number; gap: number };
+    next: SectionElement;
+    prev: SectionElement;
+    current: SectionElement;
+    index: number;
+    align: string;
+}
 
-    const [m, setM] = useState([0, 0]);
-    const [l1, setl1] = useState([window.innerWidth, 0]);
-    const [l2, setl2] = useState([0, 0]);
-    const [q, setQ] = useState([
+function Header({ list }: { list: object[] }) {
+    //CONTEXT
+    const mouse = useContext(MouseContext);
+
+    //REFS
+    let content = useRef();
+    let svg = useRef<SVGSVGElement | null>(null);
+    let navbar = useRef<SVGPathElement | null>(null);
+
+    let revertAnimation = useRef<gsap.core.Tween | null>(null);
+    let openAnimation = useRef<gsap.core.Tween | null>(null);
+
+    // STATES
+
+    let [isDragging, setDragging] = useState<Boolean>(false);
+    const [started, setStarted] = useState<Boolean>(false);
+
+    const [m, setM] = useState<[number, number]>([0, 0]);
+    const [l1, setl1] = useState<[number, number]>([window.innerWidth, 0]);
+    const [l2, setl2] = useState<[number, number]>([0, 0]);
+    const [q, setQ] = useState<[number, number, number, number]>([
         -window.innerWidth / 2,
         120,
         -window.innerWidth,
@@ -49,107 +67,11 @@ const Header = forwardRef(function Header(props, wrapper: any) {
         z: "",
     });
 
-    const pathStr2 = useMemo(() => {
-        let pointm = "M" + m.join();
-        let pointl1 = "l" + l1.join();
-        let pointl2 = "l" + l2.join();
-        let pointq = "q" + q.join();
-
-        let currentPath = `${pointm} ${pointl1} ${pointl2} ${pointq}`;
-
-        return currentPath;
-    }, [m, l1, l2, q]);
-
     const [isOpen, setOpen] = useState(false);
-    let revertAnimation = useRef(null);
-    let openAnimation = useRef(null);
     let [startPoint, setStartPoint] = useState({ x: 50, y: 50, qx: 0, qy: 0 });
+    const [svgHeight, setSvgHeight] = useState("65px");
 
-    function setPath(
-        {
-            M,
-            l1,
-            l2,
-            q,
-        }: {
-            M?: number[];
-            l1?: number[];
-            l2?: number[];
-            q?: number[];
-        },
-        from?,
-    ) {
-        let tmp: {
-            M?: number[];
-            l1?: number[];
-            l2?: number[];
-            q?: number[];
-            z: string;
-        } = JSON.parse(JSON.stringify(path));
-
-        for (let key in arguments[0]) {
-            if (key.indexOf("_") != -1) {
-                continue;
-            }
-            let arg;
-            let k;
-
-            try {
-                arg = arguments[0][key];
-                if (arg) {
-                    arg.forEach((e, i) => {
-                        tmp[key][i] = e;
-                    });
-                }
-            } catch (error) {
-                console.log("\nerror", arg, key);
-            }
-        }
-
-        _setPath({
-            M: tmp.M,
-            l1: tmp.l1,
-            l2: tmp.l2,
-            q: tmp.q,
-            z: tmp.z,
-        });
-        let height =
-            (navbar.current.getBoundingClientRect().height + 10).toFixed(3) +
-            "px";
-        setSvgHeight(height);
-    }
-
-    function setPath2({
-        M,
-        l1,
-        l2,
-        q,
-    }: {
-        M?: any;
-        l1?: any;
-        l2?: any;
-        q?: any;
-    }) {
-        if (M) {
-            setM([M]);
-        }
-        if (l1) {
-            setl1(l1);
-        }
-        if (l2) {
-            setl2(l2);
-        }
-        if (q) {
-            let w = q[2] ? q[2] : -window.innerWidth;
-            let h = q[3] ? q[3] : 0;
-            setQ([q[0], q[1], w, h]);
-        }
-
-        let height =
-            (navbar.current.getBoundingClientRect().height + 10).toFixed(3) +
-            "px";
-        setSvgHeight(height);
-    }
+    //MEMO
 
     const pathStr = useMemo(() => {
         let currentPath = Object.entries(path)
@@ -161,24 +83,133 @@ const Header = forwardRef(function Header(props, wrapper: any) {
         return currentPath;
     }, [path]);
 
-    const [svgHeight, setSvgHeight] = useState("65px");
+    const pathStr2 = useMemo(() => {
+        let pointm = "M" + m.join();
+        let pointl1 = "l" + l1.join();
+        let pointl2 = "l" + l2.join();
+        let pointq = "q" + q.join();
 
-    const list = [
-        { name: "Home", href: "/home" },
-        { name: "About", href: "/about" },
-        { name: "Portfolio", href: "/portfolio" },
-        { name: "Gallery", href: "/gallery" },
-        { name: "Contact", href: "/contact" },
-    ];
+        let currentPath = `${pointm} ${pointl1} ${pointl2} ${pointq}`;
+
+        return currentPath;
+    }, [m, l1, l2, q]);
+
+    const bar = useMemo(() => {
+        return navbar.current
+            ? {
+                  height: navbar.current.getBoundingClientRect().height,
+                  width: navbar.current.getBoundingClientRect().width,
+              }
+            : { height: 0, width: 0 };
+    }, [navbar.current]);
+
+    // PATH FUNCTIONS
+
+    function setPath({
+        M,
+        l1,
+        l2,
+        q,
+    }: {
+        M?: number[];
+        l1?: number[];
+        l2?: number[];
+        q?: number[];
+    }) {
+        type tmpType = {
+            M: number[];
+            l1: number[];
+            l2: number[];
+            q: number[];
+            z: number[];
+        };
+        let tmp: tmpType = JSON.parse(JSON.stringify(path));
+
+        for (let key in arguments[0]) {
+            if (!arguments[0][key]) continue;
+            if (key.indexOf("_") !== -1 || key === "z") {
+                continue;
+            }
+            let arg: number[];
+
+            try {
+                arg = arguments[0][key];
+                if (arg) {
+                    arg.forEach((e: number, i: number) => {
+                        tmp[key as keyof tmpType][i] = e;
+                    });
+                }
+            } catch (error) {
+                console.log("\nerror", key);
+            }
+        }
+
+        _setPath({
+            M: tmp.M,
+            l1: tmp.l1,
+            l2: tmp.l2,
+            q: tmp.q,
+            z: "",
+        });
+
+        let height = navbar.current
+            ? (navbar.current.getBoundingClientRect().height + 10).toFixed(3) +
+              "px"
+            : "65px";
+
+        setSvgHeight(height);
+    }
+
+    function setPath2({
+        nM,
+        nl1,
+        nl2,
+        nq,
+    }: {
+        nM?: [number, number];
+        nl1?: [number, number] | number;
+        nl2?: [number, number] | number;
+        nq?: [number, number, number, number] | [number, number] | number;
+    }) {
+        if (nM) {
+            setM(nM);
+        }
+        if (nl1) {
+            let L1: [number, number] = typeof nl1 === "number" ? [nl1, 0] : nl1;
+            setl1(L1);
+        }
+        if (nl2) {
+            let L2: [number, number] = typeof nl2 === "number" ? [0, nl2] : nl2;
+            setl2(L2);
+        }
+        if (nq) {
+            let Q1: [number, number, number, number] =
+                typeof nq === "number"
+                    ? [q[0], nq, q[2], q[3]]
+                    : nq.length === 2
+                    ? [nq[0], nq[1], q[2], q[3]]
+                    : nq;
+            setQ(Q1);
+        }
+
+        let height = navbar.current
+            ? (navbar.current.getBoundingClientRect().height + 10).toFixed(3) +
+              "px"
+            : "65px";
+        setSvgHeight(height);
+    }
 
     function onResize() {
         setPath2({
-            M: [0, 0],
-            l1: [window.innerWidth, 0],
-            l2: [0, 0],
-            q: [-window.innerWidth / 2, 120, -window.innerWidth, 0],
+            nM: [0, 0],
+            nl1: [window.innerWidth, 0],
+            nl2: [0, 0],
+            nq: [-window.innerWidth / 2, 120, -window.innerWidth, 0],
         });
     }
+
+    //EFFECTS
+    // - onLoaded
     useEffect(() => {
         onResize();
         setStarted(true);
@@ -192,14 +223,188 @@ const Header = forwardRef(function Header(props, wrapper: any) {
         };
     }, []);
 
-    function pointerDown(el) {
+    // DRAGING
+    useEffect(() => {
+        if (isDragging) {
+            let moveX = mouse.x - window.innerWidth;
+            let moveY = startPoint.qy + (mouse.y - startPoint.y);
+
+            /*             this.qh({
+                hx: moveX,
+                hy: moveY + 120,
+            }); */
+
+            setPath2({ nq: [moveX, moveY] });
+        }
+    }, [mouse, startPoint]);
+
+    // - open / revert
+    useEffect(() => {
+        if (!started) return;
+        if (!isDragging) {
+            if (Math.abs(startPoint.qy - q[1]) > 120) {
+                setOpen(!isOpen);
+            } else {
+                console.log("revert");
+                let from = JSON.parse(JSON.stringify(q));
+                let to = [-window.innerWidth / 2, 120, -window.innerWidth, 0];
+                revertAnimation.current = curveAnimation(from, to);
+                revertAnimation.current.play();
+            }
+        }
+    }, [isDragging]);
+
+    // open/close effext
+    useEffect(() => {
+        if (!started) return;
+        if (isOpen) {
+            openAnimation.current = heightAnimation(0, 500);
+            openAnimation.current.play().then(() => {
+                let from = q;
+                revertAnimation.current = curveAnimation(
+                    from,
+                    [-window.innerWidth / 2, 120, -window.innerWidth, 0],
+                    "elastic.out(1.3, 0.1)",
+                );
+                revertAnimation.current.play();
+            });
+        } else {
+            openAnimation.current = heightAnimation(l2[1], 0);
+            openAnimation.current.play().then(() => {
+                let from = JSON.parse(JSON.stringify(q));
+                revertAnimation.current = curveAnimation(from, [
+                    -window.innerWidth / 2,
+                    120,
+                    -window.innerWidth,
+                    0,
+                ]);
+                revertAnimation.current.play();
+            });
+        }
+    }, [isOpen]);
+
+    //ANIMATIONS
+
+    /*    function animateSvg(from: number[] | number, to: number[] | number) {
+        let animation = gsap.fromTo(
+            { nq: JSON.parse(JSON.stringify(q)) },
+            {
+                nq: from,
+            },
+            {
+                nq: to,
+                ease: "elastic.out(1.75, 0.1)",
+                duration: 5,
+                onUpdate: update,
+                paused: true,
+            },
+        );
+
+        function update(this: gsap.AnimationVars) {
+            let obj = this.targets()[0];
+
+            for (let k in obj) {
+                if (typeof obj[k] === "string" && obj[k].indexOf(",") > 0) {
+                    obj[k] = obj[k]
+                        .split(",")
+                        .map((e: string) => Number(Number(e).toFixed(3)));
+                }
+            }
+            setPath2(obj);
+        }
+        return animation;
+    }
+    function openSvg(from: [number, number], to: [number, number]) {
+        let animation = gsap.fromTo(
+            JSON.parse(JSON.stringify(path)),
+            {
+                nl2: from,
+            },
+            {
+                nl2: to,
+
+                duration: 0.2,
+                onUpdate: update,
+                paused: true,
+            },
+        );
+        function update(this: gsap.AnimationVars) {
+            let obj = this.targets()[0];
+
+            for (let k in obj) {
+                if (typeof obj[k] === "string" && obj[k].indexOf(",") > 0) {
+                    obj[k] = obj[k]
+                        .split(",")
+                        .map((e: string) => Number(Number(e).toFixed(3)));
+                }
+            }
+            setPath2(obj);
+        }
+        return animation;
+    } */
+
+    function curveAnimation(
+        from: number[],
+        to: number[],
+        ease: string = "elastic.out(1.75, 0.1)",
+    ): gsap.core.Tween {
+        console.log("revert", from, to);
+        from = from || [q[0], q[1]];
+        let animation = gsap.fromTo(
+            { nq: from },
+            {
+                nq: from,
+            },
+            {
+                nq: to,
+                ease: ease,
+                duration: 5,
+                onUpdate: animationUpdate,
+                paused: true,
+            },
+        );
+
+        return animation;
+    }
+    function heightAnimation(from: number, to: number): gsap.core.Tween {
+        let animation = gsap.fromTo(
+            { nq: q, nl2: l2 },
+            {
+                nl2: [0, from],
+            },
+            {
+                nl2: [0, to],
+                nq: [q[0], q[1] - to * 1.2],
+                duration: 0.2,
+                onUpdate: animationUpdate,
+                paused: true,
+            },
+        );
+        return animation;
+    }
+
+    function animationUpdate(this: gsap.AnimationVars) {
+        let obj = this.targets()[0];
+
+        for (let k in obj) {
+            if (typeof obj[k] === "string" && obj[k].indexOf(",") > 0) {
+                obj[k] = obj[k]
+                    .split(",")
+                    .map((e: string) => Number(Number(e).toFixed(3)));
+            }
+        }
+        setPath2(obj);
+    }
+
+    //EVENT HANDLERS
+    function pointerDown(el: any) {
+        console.log(el);
         document.body.classList.add("no-select");
-        if (el.target == wrapper.current || true) {
+        if (true) {
             if (revertAnimation.current) {
                 console.log(revertAnimation.current);
                 revertAnimation.current.kill();
             }
-            const event = el.touches ? el.touches[0] : el;
 
             //Start Dragging
             setDragging(true);
@@ -213,146 +418,14 @@ const Header = forwardRef(function Header(props, wrapper: any) {
             });
         }
     }
-    useEffect(() => {
-        if (isDragging) {
-            console.log(isDragging);
-            let moveX = mouse.x - window.innerWidth;
-            let moveY = startPoint.qy + (mouse.y - startPoint.y);
 
-            /*             this.qh({
-                hx: moveX,
-                hy: moveY + 120,
-            }); */
-
-            setPath2({ q: [moveX, moveY] });
-        }
-    }, [mouse, startPoint]);
-
-    useEffect(() => {
-        if (!started) return;
-        if (!isDragging) {
-            if (Math.abs(startPoint.qy - q[1]) > 120) {
-                setOpen(!isOpen);
-            } else {
-                console.log("revert");
-                let from = JSON.parse(JSON.stringify(q));
-                let to = [-window.innerWidth / 2, 120, -window.innerWidth, 0];
-                revertAnimation.current = animateSvg(from, to);
-                revertAnimation.current.play();
-            }
-        }
-    }, [isDragging]);
-
-    useEffect(() => {
-        if (!started) return;
-        if (isOpen) {
-            openAnimation.current = openSvg(l2, [0, 500]);
-            openAnimation.current.play().then(() => {
-                let from = q;
-                from[1] = from[1] - 100;
-                revertAnimation.current = animateSvg(from, [
-                    -window.innerWidth / 2,
-                    120,
-                    -window.innerWidth,
-                    0,
-                ]);
-                revertAnimation.current.play();
-            });
-        } else {
-            openAnimation.current = openSvg(
-                JSON.parse(JSON.stringify(l2)),
-                [0, 0],
-            );
-            openAnimation.current.play().then(() => {
-                let from = JSON.parse(JSON.stringify(q));
-                from[1] = from[1];
-                revertAnimation.current = animateSvg(from, [
-                    -window.innerWidth / 2,
-                    120,
-                    -window.innerWidth,
-                    0,
-                ]);
-                revertAnimation.current.play();
-            });
-        }
-    }, [isOpen]);
-
-    /*     function pointerMove(ev) {
-        setCurrentMouse({
-            x: ev.clientX,
-            y: ev.clientY,
-        });
-    } */
-    function pointerUp(el) {
+    function pointerUp() {
         document.body.classList.remove("no-select");
         setDragging(false);
     }
-
-    function animateSvg(from, to) {
-        console.log("revert", from, to);
-        let animation = gsap.fromTo(
-            { q: JSON.parse(JSON.stringify(q)) },
-            {
-                q: from,
-            },
-            {
-                q: to,
-                ease: "elastic.out(1.75, 0.1)",
-                duration: 5,
-                onUpdate: update,
-                paused: true,
-            },
-        );
-
-        function update() {
-            let obj = this.targets()[0];
-
-            for (let k in obj) {
-                if (typeof obj[k] == "string" && obj[k].indexOf(",") > 0) {
-                    obj[k] = obj[k]
-                        .split(",")
-                        .map((e) => Number(Number(e).toFixed(3)));
-                }
-            }
-            setPath2(obj);
-        }
-        return animation;
-    }
-    function openSvg(from, to) {
-        let animation = gsap.fromTo(
-            JSON.parse(JSON.stringify(path)),
-            {
-                l2: from,
-            },
-            {
-                l2: to,
-
-                duration: 0.2,
-                onUpdate: update,
-                paused: true,
-            },
-        );
-        function update() {
-            let obj = this.targets()[0];
-
-            for (let k in obj) {
-                if (typeof obj[k] == "string" && obj[k].indexOf(",") > 0) {
-                    obj[k] = obj[k]
-                        .split(",")
-                        .map((e) => Number(Number(e).toFixed(3)));
-                }
-            }
-            setPath2(obj);
-        }
-        return animation;
-    }
-
     return (
         <>
-            <div
-                className="navbar-wrapper top"
-                ref={wrapper}
-                style={{ height: svgHeight }}>
+            <div className="navbar-wrapper top" style={{ height: svgHeight }}>
                 <svg
                     className="navbar-svg"
                     ref={svg}
@@ -390,5 +463,6 @@ const Header = forwardRef(function Header(props, wrapper: any) {
             </div>
         </>
     );
-});
+}
+
 export default Header;

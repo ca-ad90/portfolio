@@ -1,56 +1,69 @@
 import Header from "./parts/Header";
-import { Section, Sections } from "./parts/Section";
+import { Section, Sections, LandingSection } from "./parts/Section";
 import Footer from "./parts/Footer";
 import "./App.css";
-import { createRef, useEffect, useRef, useContext, useState } from "react";
-import { MouseContext } from "./context.js";
+import {
+    ReactNode,
+    RefObject,
+    createRef,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { MouseContext } from "./context.ts";
+interface SectionElement extends HTMLElement {
+    height: number;
+    top: number;
+    bottom: number;
+    y: number;
+    tag: number;
+    overflow: number;
+    offset: { top: number; bottom: number; gap: number };
+    next: SectionElement;
+    prev: SectionElement;
+    current: SectionElement;
+    index: number;
+    align: string;
+}
 
-function App() {
-    const [mouse, setMouse] = useState({ x: null, y: null });
+function App(): JSX.Element {
+    const [mouse, setMouse] = useState<{ x: number; y: number }>({
+        x: 0,
+        y: 0,
+    });
     useEffect(() => {
         window.addEventListener("pointermove", pointerMove);
         return () => window.removeEventListener("pointermove", pointerMove);
     }, []);
 
-    function pointerMove(e) {
+    function pointerMove(e: MouseEvent) {
         setMouse({
             x: e.clientX,
             y: e.clientY,
         });
     }
-    const doc = useRef(null);
-    const sections: any = new Array(Sections.length + 2)
+    const doc = useRef<SectionElement | null | HTMLDivElement>(null);
+    const sections: RefObject<SectionElement>[] = new Array(Sections.length + 2)
         .fill(null)
         .map((_, i) => createRef());
-    interface SectionElement extends Element {
-        height: number;
-        top: number;
-        bottom: number;
-        y: number;
-        tag: number;
-        overflow: number;
-        offset: { top: number; bottom: number; gap: number };
-        next: SectionElement;
-        prev: SectionElement;
-        current: SectionElement;
-        index: number;
-    }
-    let currentIndex = useRef(0);
 
-    let running = false;
+    let [currentIndex, setCurrentIndex] = useState<number>(0);
 
-    let dir = useRef(1);
+    let running: Boolean = false;
 
-    let _freq = {
+    let dir = useRef<number>(1);
+
+    let _freq: { n: number; time: number } = {
         n: 0,
-        time: null,
+        time: 0,
     };
-    let frame = useRef(setTimeout(() => {}, 1));
+    let frame = useRef<NodeJS.Timeout>(setTimeout(() => {}, 1));
     let section: NodeListOf<SectionElement> | any;
     useEffect(() => {
         try {
-            section = sections.map((e) => e.current);
-            section.forEach((e, i) => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            section = sections.map((e: RefObject<SectionElement>) => e.current);
+            section.forEach((e: SectionElement, i: number) => {
                 Object.defineProperties(e, {
                     height: {
                         get: function () {
@@ -86,8 +99,8 @@ function App() {
                         get: function () {
                             var offset: number;
                             if (
-                                currentIndex.current === 0 ||
-                                currentIndex.current === section.length - 1
+                                currentIndex === 0 ||
+                                currentIndex === section.length - 1
                             ) {
                                 offset = 0;
                             } else {
@@ -100,7 +113,7 @@ function App() {
                         get: function () {
                             let spaceLeft =
                                 window.innerHeight -
-                                section[currentIndex.current].height;
+                                section[currentIndex].height;
                             let offsetTop = (spaceLeft / 2) * 0.9;
                             let offsetBottom = (spaceLeft / 2) * 1.1;
                             return {
@@ -108,7 +121,7 @@ function App() {
                                 bottom: offsetBottom,
                                 gap:
                                     window.innerHeight -
-                                    section[currentIndex.current].height,
+                                    section[currentIndex].height,
                             };
                         },
                     },
@@ -153,22 +166,24 @@ function App() {
                     },
                     current: {
                         get() {
-                            let index = currentIndex.current
-                                ? currentIndex.current
-                                : 0;
+                            let index = currentIndex ? currentIndex : 0;
                             return section[index];
                         },
                     },
                 });
             });
         } catch (err) {
+            if (section[0] == null) {
+                console.log(section);
+                return;
+            }
             if (Object.prototype.hasOwnProperty.call(section[0], "overflow")) {
             } else {
             }
         }
         startListeners();
     });
-    function keyHandler(e) {
+    function keyHandler(e: KeyboardEvent) {
         e.preventDefault();
         // if scroll animation is running ignore and return
         if (running) {
@@ -177,44 +192,44 @@ function App() {
         //set scroll dir.currentection
 
         /*key Up*/
-        if (e.keyCode == 38 && !running) {
+        if (e.keyCode === 38 && !running) {
             dir.current = -1;
         }
         /*key Down*/
-        if (e.keyCode == 40 && !running) {
+        if (e.keyCode === 40 && !running) {
             dir.current = 1;
         }
 
         // if partial scrolling in section
         if (partialScroll()) return;
 
-        scrollBy(section[currentIndex.current].next.top, 1000, false).then(
-            () => {
-                //restart listensers
-                startListeners();
-                currentIndex.current = section[currentIndex.current].next.index;
-            },
-        );
+        scrollBy(section[currentIndex].next.top, 1000, false).then(() => {
+            //restart listensers
+            startListeners();
+            setCurrentIndex(section[currentIndex].next.index);
+        });
     }
     function killListeners() {
-        doc.current.onwheel = wLock.bind(this);
+        if (!doc.current) return;
+        doc.current.onwheel = wLock;
         window.onkeydown = null;
     }
     function startListeners() {
-        doc.current.onwheel = wHandler.bind(this);
-        window.onkeydown = keyHandler.bind(this);
+        if (!doc.current) return;
+        doc.current.onwheel = wHandler;
+        window.onkeydown = keyHandler;
     }
-    let freq = () => {
+    function freq() {
         let time = new Date().getTime();
-        if (time - _freq.time > 100 || _freq == null) {
+        if (time - _freq.time > 100 || _freq === null) {
             _freq.time = time;
             _freq.n = 0;
         }
         _freq.n += dir.current;
         _freq.time = new Date().getTime();
         return _freq.n;
-    };
-    function wHandler(e) {
+    }
+    function wHandler(e: WheelEvent) {
         if (e.ctrlKey) return;
         e.preventDefault();
 
@@ -229,28 +244,25 @@ function App() {
 
         // trigger scrollEvent if scrollCounter > 3
         if (Math.abs(freq()) > 3) {
-            scrollBy(section[currentIndex.current].next.top, 1000, false).then(
-                () => {
-                    // restart listeners and set current section
-                    startListeners();
-                    currentIndex.current =
-                        section[currentIndex.current].next.index;
-                },
-            );
+            scrollBy(section[currentIndex].next.top, 1000, false).then(() => {
+                // restart listeners and set current section
+                startListeners();
+                setCurrentIndex(section[currentIndex].next.index);
+            });
         }
     }
-    function curve(x) {
+    function curve(x: number) {
         //return animation timing curve
         return 0.5 * Math.cos(Math.PI * x - Math.PI) + 0.5;
     }
-    function wLock(e) {
+    function wLock(e: WheelEvent) {
         if (e.ctrlKey) return;
 
         // scroll scounter - when listener is "killed"
         e.preventDefault();
-        if (dir.current != e.deltaY / Math.abs(e.deltaY)) {
+        if (dir.current !== e.deltaY / Math.abs(e.deltaY)) {
             _freq.n = 0;
-            _freq.time = null;
+            _freq.time = 0;
         }
         freq();
     }
@@ -262,17 +274,14 @@ function App() {
 
         let scrollBottom =
             dir.current > 0
-                ? Math.ceil(section[currentIndex.current].bottom)
-                : Math.floor(section[currentIndex.current].top);
+                ? Math.ceil(section[currentIndex].bottom)
+                : Math.floor(section[currentIndex].top);
 
         //if scrolling down, scroll 80 extra before jumping to next section
         let offset = dir.current < 0 ? 0 : 80;
 
         // if section has overflow(larger than 100vh) and section scrollEnd is larger than offset
-        if (
-            scrollBottom <= offset - 1 &&
-            section[currentIndex.current].overflow
-        ) {
+        if (scrollBottom <= offset - 1 && section[currentIndex].overflow) {
             // set partial scroll length
             // default 100px, but set minimum scroll length to 100 (to avoid small scrolls that feels unnecescary)
             let len =
@@ -291,11 +300,12 @@ function App() {
         }
         return returnValue;
     }
-    function scrollBy(length, duration = 500, step) {
+    function scrollBy(length: number, duration = 500, step?: boolean) {
         // Promise so that listeners can be activated after scrolling is done
         return new Promise((res) => {
             // Set start as scrollTop on animation start
-            let startPos = doc.current.scrollTop;
+
+            let startPos = doc.current ? doc.current.scrollTop : 0;
 
             // Kill listeners so no event triggers during animation.
             killListeners();
@@ -327,12 +337,13 @@ function App() {
                 // get multiplier from timeing curve
                 // f(x) = current part of full length
                 let q = curve(x);
+                if (!doc.current) return;
                 doc.current.scrollTo({
                     top: f + len * q,
                     behavior: "auto",
                 });
 
-                if (x == 1) {
+                if (x === 1) {
                     startListeners();
                     clearInterval(frame.current);
 
@@ -369,7 +380,7 @@ function App() {
         <>
             {" "}
             <MouseContext.Provider value={mouse}>
-                <Header ref={sections[0]} />
+                <Header list={[]} />
             </MouseContext.Provider>
             <div id="parallax-wrapper" ref={doc}>
                 <div className="parallax-bg img-1"></div>
@@ -377,6 +388,7 @@ function App() {
 
                 <div id="grid-wrapper" style={{ top: "0px" }}>
                     <main>
+                        <LandingSection data="" ref={sections[0]} />
                         {Sections.map((e, i) => {
                             return (
                                 <Section

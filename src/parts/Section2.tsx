@@ -67,7 +67,7 @@ function AboutSection(props: {
                             "intro-" +
                             e.name +
                             " content-wrapper " +
-                            (part == e.name ? "show" : "hidden")
+                            (part === e.name ? "show" : "hidden")
                         }
                         key={i + e.title}>
                         <section className="sub-section">
@@ -87,7 +87,7 @@ function AboutSection(props: {
                             "intro-pic " +
                             e.name +
                             " parralax " +
-                            (part == e.name ? "show" : "hidden")
+                            (part === e.name ? "show" : "hidden")
                         }
                         onClick={() => setPart(e.name)}></div>
                 ))}
