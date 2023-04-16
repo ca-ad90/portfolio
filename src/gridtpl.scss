@@ -1,0 +1,26 @@
+.grid {
+    @for $i from 1 through 16 {
+        &-col-start#{$i} {
+            grid-column-start: $i;
+        }
+        &-col-end#{$i} {
+            grid-column-end: $i;
+        }
+    }
+    &-col-end-1 {
+        grid-column-end: -1;
+    }
+}
+.flexbox {
+    display: flex;
+
+    &.flow-row {
+        flex-direction: row;
+    }
+    &.flow-col {
+        flex-direction: column;
+    }
+    &.flow-wrap {
+        flex-wrap: wrap;
+    }
+}

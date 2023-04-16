@@ -101,9 +101,7 @@ function PortfolioSetion(props: PortfolioProps): ReactElement {
     useEffect(() => {
         fetch("../portfolioSettings.json")
             .then((e) => e.json())
-            .then((data) => {
-                console.log(data);
-            });
+            .then((data) => {});
     });
 
     function thumbNail() {

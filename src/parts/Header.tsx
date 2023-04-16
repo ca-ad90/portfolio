@@ -12,6 +12,7 @@ import "./header.css";
 import { MouseContext } from "../context.ts";
 import { gsap } from "gsap";
 import { Type } from "typescript";
+import { Link } from "react-router-dom";
 
 function copy(obj: Array<Type> | Object) {
     return JSON.parse(JSON.stringify(obj));
@@ -32,7 +33,7 @@ interface SectionElement extends HTMLElement {
     align: string;
 }
 
-function Header({ list }: { list: object[] }) {
+function Header({ list }: { list: { path: string; name: string }[] }) {
     //CONTEXT
     const mouse = useContext(MouseContext);
 
@@ -48,7 +49,6 @@ function Header({ list }: { list: object[] }) {
 
     let [isDragging, setDragging] = useState<Boolean>(false);
     const [started, setStarted] = useState<Boolean>(false);
-
     const [m, setM] = useState<[number, number]>([0, 0]);
     const [l1, setl1] = useState<[number, number]>([window.innerWidth, 0]);
     const [l2, setl2] = useState<[number, number]>([0, 0]);
@@ -73,16 +73,6 @@ function Header({ list }: { list: object[] }) {
 
     //MEMO
 
-    const pathStr = useMemo(() => {
-        let currentPath = Object.entries(path)
-            .map((e) => {
-                e[0] = e[0].replace(/\d/, "");
-                return e;
-            })
-            .flat(99); // [["M",[0,0]],["l1",[100,0]]...]
-        return currentPath;
-    }, [path]);
-
     const pathStr2 = useMemo(() => {
         let pointm = "M" + m.join();
         let pointl1 = "l" + l1.join();
@@ -94,71 +84,7 @@ function Header({ list }: { list: object[] }) {
         return currentPath;
     }, [m, l1, l2, q]);
 
-    const bar = useMemo(() => {
-        return navbar.current
-            ? {
-                  height: navbar.current.getBoundingClientRect().height,
-                  width: navbar.current.getBoundingClientRect().width,
-              }
-            : { height: 0, width: 0 };
-    }, [navbar.current]);
-
     // PATH FUNCTIONS
-
-    function setPath({
-        M,
-        l1,
-        l2,
-        q,
-    }: {
-        M?: number[];
-        l1?: number[];
-        l2?: number[];
-        q?: number[];
-    }) {
-        type tmpType = {
-            M: number[];
-            l1: number[];
-            l2: number[];
-            q: number[];
-            z: number[];
-        };
-        let tmp: tmpType = JSON.parse(JSON.stringify(path));
-
-        for (let key in arguments[0]) {
-            if (!arguments[0][key]) continue;
-            if (key.indexOf("_") !== -1 || key === "z") {
-                continue;
-            }
-            let arg: number[];
-
-            try {
-                arg = arguments[0][key];
-                if (arg) {
-                    arg.forEach((e: number, i: number) => {
-                        tmp[key as keyof tmpType][i] = e;
-                    });
-                }
-            } catch (error) {
-                console.log("\nerror", key);
-            }
-        }
-
-        _setPath({
-            M: tmp.M,
-            l1: tmp.l1,
-            l2: tmp.l2,
-            q: tmp.q,
-            z: "",
-        });
-
-        let height = navbar.current
-            ? (navbar.current.getBoundingClientRect().height + 10).toFixed(3) +
-              "px"
-            : "65px";
-
-        setSvgHeight(height);
-    }
 
     function setPath2({
         nM,
@@ -245,7 +171,6 @@ function Header({ list }: { list: object[] }) {
             if (Math.abs(startPoint.qy - q[1]) > 120) {
                 setOpen(!isOpen);
             } else {
-                console.log("revert");
                 let from = JSON.parse(JSON.stringify(q));
                 let to = [-window.innerWidth / 2, 120, -window.innerWidth, 0];
                 revertAnimation.current = curveAnimation(from, to);
@@ -264,7 +189,7 @@ function Header({ list }: { list: object[] }) {
                 revertAnimation.current = curveAnimation(
                     from,
                     [-window.innerWidth / 2, 120, -window.innerWidth, 0],
-                    "elastic.out(1.3, 0.1)",
+                    "elastic.out(1.2, 0.15)",
                 );
                 revertAnimation.current.play();
             });
@@ -346,9 +271,8 @@ function Header({ list }: { list: object[] }) {
     function curveAnimation(
         from: number[],
         to: number[],
-        ease: string = "elastic.out(1.75, 0.1)",
+        ease: string = "elastic.out(1.2, 0.15)",
     ): gsap.core.Tween {
-        console.log("revert", from, to);
         from = from || [q[0], q[1]];
         let animation = gsap.fromTo(
             { nq: from },
@@ -358,7 +282,7 @@ function Header({ list }: { list: object[] }) {
             {
                 nq: to,
                 ease: ease,
-                duration: 5,
+                duration: 3,
                 onUpdate: animationUpdate,
                 paused: true,
             },
@@ -398,11 +322,9 @@ function Header({ list }: { list: object[] }) {
 
     //EVENT HANDLERS
     function pointerDown(el: any) {
-        console.log(el);
         document.body.classList.add("no-select");
         if (true) {
             if (revertAnimation.current) {
-                console.log(revertAnimation.current);
                 revertAnimation.current.kill();
             }
 
@@ -426,6 +348,15 @@ function Header({ list }: { list: object[] }) {
     return (
         <>
             <div className="navbar-wrapper top" style={{ height: svgHeight }}>
+                <div>
+                    {list.map((e) => {
+                        return (
+                            <Link to={e.path} key={e.name + "HEADER"}>
+                                {e.name}
+                            </Link>
+                        );
+                    })}
+                </div>
                 <svg
                     className="navbar-svg"
                     ref={svg}

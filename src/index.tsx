@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import "./gridtpl.scss";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 const DOMsections: any = "hen";
 
-console.log(DOMsections);
 const root = ReactDOM.createRoot(
     document.getElementById("root") as HTMLElement,
 );
